@@ -8,6 +8,15 @@ content_headers = {
     'difficulty': "average difficulty is",
     'word': "word is"
 }
+        
+difficulty_decoder = {
+    'one': 1.0,
+    'two': 2.0,
+    'three': 3.0,
+    'four': 4.0,
+    'five': 5.0,
+    'six': 6.0
+}
 
 def parse_content(crumb: str, difficulty: bool):
     if difficulty:
@@ -20,7 +29,10 @@ def parse_content(crumb: str, difficulty: bool):
                 failed = True
                 break
         if not failed:
-            return crumb[4]
+            if crumb[4] in difficulty_decoder:
+                return difficulty_decoder.get(crumb[4])
+            else:
+                return float(crumb[4])
         else:
             return None
                 
@@ -39,13 +51,15 @@ def parse_content(crumb: str, difficulty: bool):
             return None
 
 def main():
-    # year, month, day = str(date.today()).split('-')
-    # if len(day) == 1:
-    #     day = '0' + day
-    
-    year = 2023
-    month = sys.argv[1]
-    day = sys.argv[2]
+    try: 
+        month = sys.argv[1]
+        day = sys.argv[2]
+        year = sys.argv[3]
+    except IndexError:
+        year, month, day = str(date.today()).split('-')
+        if len(day) == 1:
+            day = '0' + day
+        
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Wind64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
     response = [None, None]
     
