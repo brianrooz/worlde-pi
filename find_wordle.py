@@ -60,7 +60,7 @@ def main():
         if len(day) == 1:
             day = '0' + day
         
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Wind64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.65 Mobile Safari/537.36'}
     response = [None, None]
     
     url = f'https://www.nytimes.com/{year}/{month}/{day}/crosswords/wordle-review.html'
