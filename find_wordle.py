@@ -1,6 +1,5 @@
 import requests
 import re
-import sys
 from bs4 import BeautifulSoup
 from datetime import date
 
@@ -46,22 +45,19 @@ def parse_content(crumb: str, difficulty: bool):
                 failed = True
                 break
         if not failed:
-            return crumb[3].replace(',', '')
+            return crumb[3].replace(',', '').lower()
         else:
             return None
 
-def main():
-    try: 
-        month = sys.argv[1]
-        day = sys.argv[2]
-        year = sys.argv[3]
-    except IndexError:
+def find_wordle(month: str = None, day: str = None, year: str = None):
+    if not month or not day or not year: 
         year, month, day = str(date.today()).split('-')
-        if len(day) == 1:
-            day = '0' + day
+    if len(day) == 1:
+        day = '0' + day
         
     headers = {'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.65 Mobile Safari/537.36'}
-    response = [None, None]
+    difficulty = None
+    word = None
     
     url = f'https://www.nytimes.com/{year}/{month}/{day}/crosswords/wordle-review.html'
     page = requests.get(url, headers=headers)
@@ -72,10 +68,8 @@ def main():
         crumb = re.sub(r'<[^>]*>', '', str(crumb))
         
         if content_headers.get('difficulty') in crumb:
-            response[1] = parse_content(crumb, True)
+            difficulty = parse_content(crumb, True)
         elif content_headers.get('word') in crumb:
-            response[0] = parse_content(crumb, False)
+            word = parse_content(crumb, False)
     
-    print(response)
-    
-main()
+    return word, difficulty
