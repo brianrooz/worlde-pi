@@ -1,0 +1,6 @@
+WHITE = "#f8f8f8"
+GREEN = "#538d4e"
+YELLOW = "#b59f3b"
+ABSENT = "#3a3a3c"
+IDLE = "#121213"
+THICKNESS = 1.7
