@@ -5,12 +5,18 @@ class Row:
     def __init__(self, tiles: list, word):
         self.tiles = tiles
         self.word = word
-        self.state = 0      # 0: 'cleared', 1: 'faded', 2: 'revealed'
+        self.state = CLEARED 
 
     def fade(self):
         for tile in self.tiles:
             tile.fade()
-        self.state = 1
+        
+        if (self.tiles[0].state == FADED and
+            self.tiles[1].state == FADED and
+            self.tiles[2].state == FADED and
+            self.tiles[3].state == FADED and
+            self.tiles[4].state == FADED):
+            self.state = FADED
 
 class Tile:
     def __init__(self, tile: Box, color: str, letter: str):
@@ -26,6 +32,7 @@ class Tile:
             '1': YELLOW,
             '2': GREEN
         }
+        self.state = CLEARED
         self.fade_color = self.word_decode.get(color, IDLE)
         self.fade_letter = letter
 
@@ -80,7 +87,8 @@ class Tile:
             # set the tile color #
             self.__set_custom_color(current_rgb[0], current_rgb[1], current_rgb[2])
         else:
-            self.tile.cancel(self.__fade)
+            # self.tile.cancel(self.__fade)
+            self.state = FADED
 
     def fade(self):
-        self.tile.repeat(10, self.__fade)
+        self.tile.repeat(20, self.__fade)

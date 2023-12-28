@@ -8,22 +8,50 @@ from solver import solver
 import sys
 
 board = []
+state = CLEARED
 
-def test():
-    # TODO: this call should set up a repeat() call. in the repeat call,
-    # we should check the 'state' variable of each row to see if it has been completely faded.
-    # once a row has been completely faded, we should board[x].fade() the next row
-    print("starting fade...")
-    board[0].fade()
-    if board[0].state: 
-        print("done!")
+def event():
+    global state
+
+    if state == CLEARED:
+        state = BEGIN_FADE
+    elif state == FADED:
+        state = BEGIN_REVEAL
+    elif state == REVEALED:
+        state = BEGIN_CLEAR
     
+def state_machine():
+    global state
+
+    if state == BEGIN_FADE:
+        if board[0].state != FADED:
+            board[0].fade()
+        elif board[1].state != FADED:
+            board[1].fade()
+        elif board[2].state != FADED:
+            board[2].fade()
+        elif board[3].state != FADED:
+            board[3].fade()
+        elif board[4].state != FADED:
+            board[4].fade()
+        elif board[5].state != FADED:
+            board[5].fade()
+        else:
+            state = FADED
+    elif state == BEGIN_REVEAL:
+        # TODO
+        print('revealing now!')
+        state = REVEALED
+    elif state == BEGIN_CLEAR:
+        # TODO
+        print('clearing now!')
+        state = CLEARED
 
 def create_board(results):
     global board
 
     app = App(title="Wordle", width=500, height=360, bg='#121213')
-    app.when_clicked = test                       # create a callback function to reveal tiles/letter on click
+    app.when_clicked = event                       # create a callback function to reveal tiles/letter on click
     area = Box(app, width=300, height=360)
     top_padding = Box(area, width=300, height=10)
 
@@ -74,6 +102,7 @@ def main():
     word, difficulty = find_wordle(month, day, year)
     results = solver(word)
     app = create_board(results)
+    app.repeat(100, state_machine)
     app.display()
 
 main()
