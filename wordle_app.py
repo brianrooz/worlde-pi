@@ -11,7 +11,9 @@ def test2():
     app.when_clicked = test
 
 def test():
-    print("hello world!")
+    for i in range(5):
+        print(i)
+        sleep(1)
     app.when_clicked = test2
 
 def create_board():
