@@ -5,11 +5,12 @@ class Row:
     def __init__(self, tiles: list, word):
         self.tiles = tiles
         self.word = word
+        self.state = 0      # 0: 'cleared', 1: 'faded', 2: 'revealed'
 
     def fade(self):
-        print(len(self.tiles))
         for tile in self.tiles:
             tile.fade()
+        self.state = 1
 
 class Tile:
     def __init__(self, tile: Box, color: str, letter: str):
@@ -80,7 +81,6 @@ class Tile:
             self.__set_custom_color(current_rgb[0], current_rgb[1], current_rgb[2])
         else:
             self.tile.cancel(self.__fade)
-
 
     def fade(self):
         self.tile.repeat(10, self.__fade)

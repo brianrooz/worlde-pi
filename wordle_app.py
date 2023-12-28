@@ -1,5 +1,5 @@
 from guizero import App, Text, PushButton, Box, Window
-from time import sleep
+from time import sleep, time
 from gui.constants import *
 from gui.objects import *
 
@@ -10,9 +10,14 @@ import sys
 board = []
 
 def test():
+    # TODO: this call should set up a repeat() call. in the repeat call,
+    # we should check the 'state' variable of each row to see if it has been completely faded.
+    # once a row has been completely faded, we should board[x].fade() the next row
     print("starting fade...")
     board[0].fade()
-    print("done!")
+    if board[0].state: 
+        print("done!")
+    
 
 def create_board(results):
     global board
