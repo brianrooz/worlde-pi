@@ -1,8 +1,18 @@
 from guizero import App, Text, PushButton, Box, Window
 from gui.constants import *
 
+class Row:
+    def __init__(self, tiles: list, word):
+        self.tiles = tiles
+        self.word = word
+
+    def fade(self):
+        print(len(self.tiles))
+        for tile in self.tiles:
+            tile.fade()
+
 class Tile:
-    def __init__(self, tile: Box):
+    def __init__(self, tile: Box, color: str, letter: str):
         self.tile = tile
 
         # state variables #
@@ -10,6 +20,13 @@ class Tile:
             'letter': None,
             'color': IDLE
         }
+        self.word_decode = {
+            '0': ABSENT,
+            '1': YELLOW,
+            '2': GREEN
+        }
+        self.fade_color = self.word_decode.get(color, IDLE)
+        self.fade_letter = letter
 
         self.top_padding = Box(tile, width=52, height=10, align="top")
         self.text = Text(tile, bg=IDLE, color=WHITE, size=24)
@@ -30,16 +47,17 @@ class Tile:
         self.tile.bg = desired_rgb
         self.properties['color'] = desired_rgb
 
-    def fade(self, color: str):
+    def __fade(self):
         current_color = self.properties.get('color')
-        desired_rgb = [self.__get_color_field(color, 'red'),
-                       self.__get_color_field(color, 'green'),
-                       self.__get_color_field(color, 'blue')]
+        desired_rgb = [self.__get_color_field(self.fade_color, 'red'),
+                       self.__get_color_field(self.fade_color, 'green'),
+                       self.__get_color_field(self.fade_color, 'blue')]
         current_rgb = [self.__get_color_field(current_color, 'red'),
                        self.__get_color_field(current_color, 'green'),
                        self.__get_color_field(current_color, 'blue')]
         
-        while((desired_rgb[0] != current_rgb[0]) or (desired_rgb[1] != current_rgb[1]) or (desired_rgb[2] != current_rgb[2])):
+        
+        if ((desired_rgb[0] != current_rgb[0]) or (desired_rgb[1] != current_rgb[1]) or (desired_rgb[2] != current_rgb[2])):
             # set red field #
             if current_rgb[0] < desired_rgb[0]:
                 current_rgb[0] = current_rgb[0] + 1
@@ -60,3 +78,9 @@ class Tile:
 
             # set the tile color #
             self.__set_custom_color(current_rgb[0], current_rgb[1], current_rgb[2])
+        else:
+            self.tile.cancel(self.__fade)
+
+
+    def fade(self):
+        self.tile.repeat(10, self.__fade)
