@@ -7,16 +7,24 @@ class Row:
         self.word = word
         self.state = CLEARED 
 
-    def fade(self):
+    def fade(self, mode: str):
         for tile in self.tiles:
-            tile.fade()
+            tile.fade(mode)
         
-        if (self.tiles[0].state == FADED and
-            self.tiles[1].state == FADED and
-            self.tiles[2].state == FADED and
-            self.tiles[3].state == FADED and
-            self.tiles[4].state == FADED):
-            self.state = FADED
+        if mode == 'on':
+            if (self.tiles[0].state == FADED and
+                self.tiles[1].state == FADED and
+                self.tiles[2].state == FADED and
+                self.tiles[3].state == FADED and
+                self.tiles[4].state == FADED):
+                self.state = FADED
+        else:
+            if (self.tiles[0].state == CLEARED and
+                self.tiles[1].state == CLEARED and
+                self.tiles[2].state == CLEARED and
+                self.tiles[3].state == CLEARED and
+                self.tiles[4].state == CLEARED):
+                self.state = CLEARED
 
 class Tile:
     def __init__(self, tile: Box, color: str, letter: str):
@@ -55,11 +63,16 @@ class Tile:
         self.tile.bg = desired_rgb
         self.properties['color'] = desired_rgb
 
-    def __fade(self):
+    def __fade(self, mode: str):
         current_color = self.properties.get('color')
-        desired_rgb = [self.__get_color_field(self.fade_color, 'red'),
-                       self.__get_color_field(self.fade_color, 'green'),
-                       self.__get_color_field(self.fade_color, 'blue')]
+        if mode == 'on': 
+            desired_rgb = [self.__get_color_field(self.fade_color, 'red'),
+                        self.__get_color_field(self.fade_color, 'green'),
+                        self.__get_color_field(self.fade_color, 'blue')]
+        else:
+            desired_rgb = [self.__get_color_field(IDLE, 'red'),
+                        self.__get_color_field(IDLE, 'green'),
+                        self.__get_color_field(IDLE, 'blue')]
         current_rgb = [self.__get_color_field(current_color, 'red'),
                        self.__get_color_field(current_color, 'green'),
                        self.__get_color_field(current_color, 'blue')]
@@ -87,8 +100,11 @@ class Tile:
             # set the tile color #
             self.__set_custom_color(current_rgb[0], current_rgb[1], current_rgb[2])
         else:
-            # self.tile.cancel(self.__fade)
-            self.state = FADED
+            self.tile.cancel(self.__fade)
+            if mode == 'on': 
+                self.state = FADED
+            else:
+                self.state = CLEARED
 
-    def fade(self):
-        self.tile.repeat(20, self.__fade)
+    def fade(self, mode: str):
+        self.tile.repeat(20, self.__fade, args=[mode])

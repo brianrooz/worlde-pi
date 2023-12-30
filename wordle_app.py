@@ -8,44 +8,70 @@ from solver import solver
 import sys
 
 board = []
+timer = 0
 state = CLEARED
 
 def event():
     global state
+    global timer
 
     if state == CLEARED:
         state = BEGIN_FADE
     elif state == FADED:
+        timer = 0
         state = BEGIN_REVEAL
     elif state == REVEALED:
         state = BEGIN_CLEAR
     
 def state_machine():
     global state
+    global timer
 
     if state == BEGIN_FADE:
         if board[0].state != FADED:
-            board[0].fade()
+            board[0].fade('on')
         elif board[1].state != FADED:
-            board[1].fade()
+            board[1].fade('on')
         elif board[2].state != FADED:
-            board[2].fade()
+            board[2].fade('on')
         elif board[3].state != FADED:
-            board[3].fade()
+            board[3].fade('on')
         elif board[4].state != FADED:
-            board[4].fade()
+            board[4].fade('on')
         elif board[5].state != FADED:
-            board[5].fade()
+            board[5].fade('on')
         else:
             state = FADED
+    elif state == FADED:
+        timer += ONE_TICK
+        if timer == 5 * ONE_SECOND:
+            state = BEGIN_CLEAR
+            timer = 0
     elif state == BEGIN_REVEAL:
         # TODO
         print('revealing now!')
         state = REVEALED
     elif state == BEGIN_CLEAR:
-        # TODO
-        print('clearing now!')
-        state = CLEARED
+        if board[0].state != CLEARED:
+            board[0].fade('off')
+        elif board[1].state != CLEARED:
+            board[1].fade('off')
+        elif board[2].state != CLEARED:
+            board[2].fade('off')
+        elif board[3].state != CLEARED:
+            board[3].fade('off')
+        elif board[4].state != CLEARED:
+            board[4].fade('off')
+        elif board[5].state != CLEARED:
+            board[5].fade('off')
+        else:
+            state = CLEARED
+            print(board[0].properties.get('color'))
+            print(board[1].properties.get('color'))
+            print(board[2].properties.get('color'))
+            print(board[3].properties.get('color'))
+            print(board[4].properties.get('color'))
+            print(board[5].properties.get('color'))
 
 def create_board(results):
     global board
@@ -102,7 +128,7 @@ def main():
     word, difficulty = find_wordle(month, day, year)
     results = solver(word)
     app = create_board(results)
-    app.repeat(100, state_machine)
+    app.repeat(ONE_TICK, state_machine)
     app.display()
 
 main()
