@@ -48,7 +48,6 @@ def state_machine():
             state = BEGIN_CLEAR
             timer = 0
     elif state == BEGIN_REVEAL:
-        print('revealing now!')
         if board[0].state != REVEALED:
             board[0].reveal()
         elif board[1].state != REVEALED:
