@@ -48,9 +48,21 @@ def state_machine():
             state = BEGIN_CLEAR
             timer = 0
     elif state == BEGIN_REVEAL:
-        # TODO
         print('revealing now!')
-        state = REVEALED
+        if board[0].state != REVEALED:
+            board[0].reveal()
+        elif board[1].state != REVEALED:
+            board[1].reveal()
+        elif board[2].state != REVEALED:
+            board[2].reveal()
+        elif board[3].state != REVEALED:
+            board[3].reveal()
+        elif board[4].state != REVEALED:
+            board[4].reveal()
+        elif board[5].state != REVEALED:
+            board[5].reveal()
+        else:
+            state = REVEALED
     elif state == BEGIN_CLEAR:
         if board[0].state != CLEARED:
             board[0].fade('off')
@@ -66,12 +78,6 @@ def state_machine():
             board[5].fade('off')
         else:
             state = CLEARED
-            print(board[0].properties.get('color'))
-            print(board[1].properties.get('color'))
-            print(board[2].properties.get('color'))
-            print(board[3].properties.get('color'))
-            print(board[4].properties.get('color'))
-            print(board[5].properties.get('color'))
 
 def create_board(results):
     global board

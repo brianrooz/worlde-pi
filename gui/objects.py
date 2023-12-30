@@ -26,6 +26,17 @@ class Row:
                 self.tiles[4].state == CLEARED):
                 self.state = CLEARED
 
+    def reveal(self):
+        for tile in self.tiles:
+            tile.reveal()
+
+        if (self.tiles[0].state == REVEALED and
+            self.tiles[1].state == REVEALED and
+            self.tiles[2].state == REVEALED and
+            self.tiles[3].state == REVEALED and
+            self.tiles[4].state == REVEALED):
+            self.state = REVEALED
+
 class Tile:
     def __init__(self, tile: Box, color: str, letter: str):
         self.tile = tile
@@ -77,7 +88,6 @@ class Tile:
                        self.__get_color_field(current_color, 'green'),
                        self.__get_color_field(current_color, 'blue')]
         
-        
         if ((desired_rgb[0] != current_rgb[0]) or (desired_rgb[1] != current_rgb[1]) or (desired_rgb[2] != current_rgb[2])):
             # set red field #
             if current_rgb[0] < desired_rgb[0]:
@@ -106,5 +116,12 @@ class Tile:
             else:
                 self.state = CLEARED
 
+    # def __reveal(self):
+
     def fade(self, mode: str):
         self.tile.repeat(20, self.__fade, args=[mode])
+
+    def reveal(self):
+        # self.tile.repeat(20, self.__reveal)
+        self.text.append(self.fade_letter.upper())
+        self.state = REVEALED
