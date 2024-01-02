@@ -28,9 +28,10 @@ def solve(game_config: Dict[str, str], solver_settings: Dict[str, str], answer=N
     clues = []
     choices = []
     guesses = 0
+    first_guess = True
     
     while guesses < int(game_config['max_guesses']):
-        chosen, cands, lencands = guess_next_word(clues, solver_settings=solver_settings, debug=0)
+        chosen, cands, lencands = guess_next_word(clues, solver_settings=solver_settings, debug=0, first_guess=first_guess)
         if not chosen:
             return choices
 
