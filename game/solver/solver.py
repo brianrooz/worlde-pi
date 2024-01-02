@@ -156,7 +156,7 @@ def guess_next_word(
     if not first_guess: 
         explorable = [x for x in explorable if sortfn(x) == max_val]
     else:
-        index = randint(0, len(explorable))
+        index = randint(0, 10)
         explorable = [explorable[index]]
 
     if len(explorable) > 0:

@@ -148,14 +148,14 @@ class Tile:
             self.state = REVEALED
 
     def fade(self, mode: str):
-        self.tile.repeat(20, self.__fade, args=[mode])
+        self.tile.repeat(10, self.__fade, args=[mode])
 
     def reveal(self):
         if self.fade_letter:
             if not self.letter_initialized:
                 self.text.append(self.fade_letter.upper())
                 self.letter_initialized = True
-            self.tile.repeat(20, self.__reveal)
+            self.tile.repeat(10, self.__reveal)
         else:
             self.state = REVEALED
 
