@@ -12,29 +12,17 @@ class Row:
             tile.fade(mode)
         
         if mode == 'on':
-            if (self.tiles[0].state == FADED and
-                self.tiles[1].state == FADED and
-                self.tiles[2].state == FADED and
-                self.tiles[3].state == FADED and
-                self.tiles[4].state == FADED):
+            if (self.tiles[0].state == self.tiles[1].state == self.tiles[2].state == self.tiles[3].state == self.tiles[4].state == FADED):
                 self.state = FADED
         else:
-            if (self.tiles[0].state == CLEARED and
-                self.tiles[1].state == CLEARED and
-                self.tiles[2].state == CLEARED and
-                self.tiles[3].state == CLEARED and
-                self.tiles[4].state == CLEARED):
+            if (self.tiles[0].state == self.tiles[1].state == self.tiles[2].state == self.tiles[3].state == self.tiles[4].state == CLEARED):
                 self.state = CLEARED
 
     def reveal(self):
         for tile in self.tiles:
             tile.reveal()
 
-        if (self.tiles[0].state == REVEALED and
-            self.tiles[1].state == REVEALED and
-            self.tiles[2].state == REVEALED and
-            self.tiles[3].state == REVEALED and
-            self.tiles[4].state == REVEALED):
+        if (self.tiles[0].state == self.tiles[1].state == self.tiles[2].state == self.tiles[3].state == self.tiles[4].state == REVEALED):
             self.state = REVEALED
 
 class Tile:
@@ -81,78 +69,80 @@ class Tile:
             self.text.text_color = desired_rgb
             self.properties['letter_color'] = desired_rgb
 
-    def __fade(self, mode: str):
-        current_color = self.properties.get('color')
-        if mode == 'on': 
+    def __calculate_rgb(self, current, desired):
+            # set red field #
+            if current[0] < desired[0]:
+                current[0] = current[0] + 1
+            elif current[0] > desired[0]:
+                current[0] = current[0] - 1
+                
+            # set green field #
+            if current[1] < desired[1]:
+                current[1] = current[1] + 1
+            elif current[1] > desired[1]:
+                current[1] = current[1] - 1
+
+            # set blue field #
+            if current[2] < desired[2]:
+                current[2] = current[2] + 1
+            elif current[2] > desired[2]:
+                current[2] = current[2] - 1
+
+            return (current[0], current[1], current[2])
+
+    def __get_target_color(self, mode: str):
+        if mode == 'on':
             desired_rgb = [self.__get_color_field(self.fade_color, 'red'),
                         self.__get_color_field(self.fade_color, 'green'),
                         self.__get_color_field(self.fade_color, 'blue')]
-        else:
+        elif (mode == 'off') or (mode == 'all'):
             desired_rgb = [self.__get_color_field(IDLE, 'red'),
                         self.__get_color_field(IDLE, 'green'),
                         self.__get_color_field(IDLE, 'blue')]
+        else:
+            desired_rgb = [self.__get_color_field(WHITE, 'red'),
+                        self.__get_color_field(WHITE, 'green'),
+                        self.__get_color_field(WHITE, 'blue')]
+        return desired_rgb
+
+    def __get_current_color(self, target):
+        current_color = self.properties.get(target)
         current_rgb = [self.__get_color_field(current_color, 'red'),
                        self.__get_color_field(current_color, 'green'),
                        self.__get_color_field(current_color, 'blue')]
-        
-        if ((desired_rgb[0] != current_rgb[0]) or (desired_rgb[1] != current_rgb[1]) or (desired_rgb[2] != current_rgb[2])):
-            # set red field #
-            if current_rgb[0] < desired_rgb[0]:
-                current_rgb[0] = current_rgb[0] + 1
-            elif current_rgb[0] > desired_rgb[0]:
-                current_rgb[0] = current_rgb[0] - 1
-                
-            # set green field #
-            if current_rgb[1] < desired_rgb[1]:
-                current_rgb[1] = current_rgb[1] + 1
-            elif current_rgb[1] > desired_rgb[1]:
-                current_rgb[1] = current_rgb[1] - 1
+        return current_rgb
 
-            # set blue field #
-            if current_rgb[2] < desired_rgb[2]:
-                current_rgb[2] = current_rgb[2] + 1
-            elif current_rgb[2] > desired_rgb[2]:
-                current_rgb[2] = current_rgb[2] - 1
+    def __fade(self, mode: str):
+        current_rgb = self.__get_current_color('color')
+        desired_rgb = self.__get_target_color(mode)
+
+        if ((desired_rgb[0] != current_rgb[0]) or (desired_rgb[1] != current_rgb[1]) or (desired_rgb[2] != current_rgb[2])):
+            r, g, b = self.__calculate_rgb(current_rgb, desired_rgb)
 
             # set the tile color #
-            self.__set_custom_color('tile', current_rgb[0], current_rgb[1], current_rgb[2])
+            self.__set_custom_color('tile', r, g, b)
+            if mode == 'all':
+                self.__set_custom_color('letter', r, g, b)
         else:
             self.tile.cancel(self.__fade)
             if mode == 'on': 
                 self.state = FADED
             else:
+                self.text.clear()
+                self.letter_initialized = False
+                self.text.text_color = self.fade_color
+                self.properties['letter_color'] = self.fade_color
                 self.state = CLEARED
 
     def __reveal(self):
-        current_color = self.properties.get('letter_color')
-        desired_rgb = [self.__get_color_field(WHITE, 'red'),
-                    self.__get_color_field(WHITE, 'green'),
-                    self.__get_color_field(WHITE, 'blue')]
-        current_rgb = [self.__get_color_field(current_color, 'red'),
-                       self.__get_color_field(current_color, 'green'),
-                       self.__get_color_field(current_color, 'blue')]
+        current_rgb = self.__get_current_color('letter_color')
+        desired_rgb = self.__get_target_color('reveal')
         
         if ((desired_rgb[0] != current_rgb[0]) or (desired_rgb[1] != current_rgb[1]) or (desired_rgb[2] != current_rgb[2])):
-            # set red field #
-            if current_rgb[0] < desired_rgb[0]:
-                current_rgb[0] = current_rgb[0] + 1
-            elif current_rgb[0] > desired_rgb[0]:
-                current_rgb[0] = current_rgb[0] - 1
-                
-            # set green field #
-            if current_rgb[1] < desired_rgb[1]:
-                current_rgb[1] = current_rgb[1] + 1
-            elif current_rgb[1] > desired_rgb[1]:
-                current_rgb[1] = current_rgb[1] - 1
-
-            # set blue field #
-            if current_rgb[2] < desired_rgb[2]:
-                current_rgb[2] = current_rgb[2] + 1
-            elif current_rgb[2] > desired_rgb[2]:
-                current_rgb[2] = current_rgb[2] - 1
+            r, g, b = self.__calculate_rgb(current_rgb, desired_rgb)
 
             # set the tile color #
-            self.__set_custom_color('letter', current_rgb[0], current_rgb[1], current_rgb[2])
+            self.__set_custom_color('letter', r, g, b)
         else:
             self.tile.cancel(self.__reveal)
             self.state = REVEALED
@@ -168,3 +158,4 @@ class Tile:
             self.tile.repeat(20, self.__reveal)
         else:
             self.state = REVEALED
+

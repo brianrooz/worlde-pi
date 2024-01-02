@@ -21,7 +21,7 @@ def event():
         timer = 0
         state = BEGIN_REVEAL
     elif state == REVEALED:
-        state = BEGIN_CLEAR
+        state = BEGIN_FULL_CLEAR
     
 def state_machine():
     global state
@@ -62,6 +62,11 @@ def state_machine():
             board[5].reveal()
         else:
             state = REVEALED
+    elif state == REVEALED:
+        timer += ONE_TICK
+        if timer == 10 * ONE_SECOND:
+            state = BEGIN_FULL_CLEAR
+            timer = 0
     elif state == BEGIN_CLEAR:
         if board[0].state != CLEARED:
             board[0].fade('off')
@@ -75,6 +80,21 @@ def state_machine():
             board[4].fade('off')
         elif board[5].state != CLEARED:
             board[5].fade('off')
+        else:
+            state = CLEARED
+    elif state == BEGIN_FULL_CLEAR:
+        if board[0].state != CLEARED:
+            board[0].fade('all')
+        elif board[1].state != CLEARED:
+            board[1].fade('all')
+        elif board[2].state != CLEARED:
+            board[2].fade('all')
+        elif board[3].state != CLEARED:
+            board[3].fade('all')
+        elif board[4].state != CLEARED:
+            board[4].fade('all')
+        elif board[5].state != CLEARED:
+            board[5].fade('all')
         else:
             state = CLEARED
 
