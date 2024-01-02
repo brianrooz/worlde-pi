@@ -4,6 +4,7 @@ from ..constants import GUESS_RIGHT_SPOT, DEFAULT_SOLVER_SETTINGS
 from ..wordle import Wordle
 from .util import is_guessable_word, parse_clues
 from ..util import get_n_from_word_set
+from random import randint
 
 def solve_wordle(
     wordle: Type[Wordle],
@@ -36,6 +37,7 @@ def guess_next_word(
     clues: List[Tuple[str, List[int]]],
     solver_settings: Dict[str, bool]=DEFAULT_SOLVER_SETTINGS,
     debug: int=1,
+    first_guess: bool=False
 ) -> Tuple[str, List[str], int]:
     if not 'candidate_set' in solver_settings or not len(solver_settings['candidate_set']): 
         raise Exception('candidate_set not specified in config')
@@ -151,7 +153,11 @@ def guess_next_word(
     explorable = [cand for cand in explorable if cand not in prev_guesses]
     explorable.sort(key=sortfn)
     max_val = sortfn(explorable[0])
-    explorable = [x for x in explorable if sortfn(x) == max_val]
+    if not first_guess: 
+        explorable = [x for x in explorable if sortfn(x) == max_val]
+    else:
+        index = randint(0, len(explorable))
+        explorable = [explorable[index]]
 
     if len(explorable) > 0:
         # Break ties by boosting words with known letter guesses because
