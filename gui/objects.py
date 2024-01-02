@@ -1,5 +1,135 @@
 from guizero import App, Text, PushButton, Box, Window
 from gui.constants import *
+from find_wordle import find_wordle
+from solver import solver
+
+class Board:
+    def __init__(self, answer: str = 'hello'):
+        self.timer = 0
+        self.state = CLEARED
+        self.app, self.rows = self.__create_board(solver(answer))
+        self.app.display()
+
+    def __event_handler(self):
+        if self.state == CLEARED:
+            self.state = BEGIN_FADE
+        elif self.state == FADED:
+            self.timer = 0
+            self.state = BEGIN_REVEAL
+        elif self.state == REVEALED:
+            self.state = BEGIN_FULL_CLEAR
+
+    def __state_machine(self):
+        if self.state == BEGIN_FADE:
+            if self.rows[0].state != FADED:
+                self.rows[0].fade('on')
+            elif self.rows[1].state != FADED:
+                self.rows[1].fade('on')
+            elif self.rows[2].state != FADED:
+                self.rows[2].fade('on')
+            elif self.rows[3].state != FADED:
+                self.rows[3].fade('on')
+            elif self.rows[4].state != FADED:
+                self.rows[4].fade('on')
+            elif self.rows[5].state != FADED:
+                self.rows[5].fade('on')
+            else:
+                self.state = FADED
+        elif self.state == FADED:
+            self.timer += ONE_TICK
+            if self.timer == 5 * ONE_SECOND:
+                self.state = BEGIN_CLEAR
+                self.timer = 0
+        elif self.state == BEGIN_REVEAL:
+            if self.rows[0].state != REVEALED:
+                self.rows[0].reveal()
+            elif self.rows[1].state != REVEALED:
+                self.rows[1].reveal()
+            elif self.rows[2].state != REVEALED:
+                self.rows[2].reveal()
+            elif self.rows[3].state != REVEALED:
+                self.rows[3].reveal()
+            elif self.rows[4].state != REVEALED:
+                self.rows[4].reveal()
+            elif self.rows[5].state != REVEALED:
+                self.rows[5].reveal()
+            else:
+                self.state = REVEALED
+        elif self.state == REVEALED:
+            self.timer += ONE_TICK
+            if self.timer == 10 * ONE_SECOND:
+                self.state = BEGIN_FULL_CLEAR
+                self.timer = 0
+        elif self.state == BEGIN_CLEAR:
+            if self.rows[0].state != CLEARED:
+                self.rows[0].fade('off')
+            elif self.rows[1].state != CLEARED:
+                self.rows[1].fade('off')
+            elif self.rows[2].state != CLEARED:
+                self.rows[2].fade('off')
+            elif self.rows[3].state != CLEARED:
+                self.rows[3].fade('off')
+            elif self.rows[4].state != CLEARED:
+                self.rows[4].fade('off')
+            elif self.rows[5].state != CLEARED:
+                self.rows[5].fade('off')
+            else:
+                self.state = CLEARED
+        elif self.state == BEGIN_FULL_CLEAR:
+            if self.rows[0].state != CLEARED:
+                self.rows[0].fade('all')
+            elif self.rows[1].state != CLEARED:
+                self.rows[1].fade('all')
+            elif self.rows[2].state != CLEARED:
+                self.rows[2].fade('all')
+            elif self.rows[3].state != CLEARED:
+                self.rows[3].fade('all')
+            elif self.rows[4].state != CLEARED:
+                self.rows[4].fade('all')
+            elif self.rows[5].state != CLEARED:
+                self.rows[5].fade('all')
+            else:
+                self.state = CLEARED
+
+    def __create_board(self, results: list):
+        board = []
+        app = App(title="Wordle", width=500, height=360, bg=IDLE)
+        app.when_clicked = self.__event_handler                       # create a callback function to reveal tiles/letter on click
+        app.repeat(ONE_TICK, self.__state_machine)                    # create a callback that is called every 100 ms 
+        area = Box(app, width=300, height=360)
+        top_padding = Box(area, width=300, height=10)
+
+        rows = []
+        for row in range(6):
+            line = Box(area, width=280, height=52.5)
+            row_padding = Box(area, width=300, height=5)
+            rows.append(line)
+
+        tiles = []
+        for row in range(MAX_ROWS):
+            for box in range(TILES_PER_ROW):
+                tile = Box(rows[row], width=52, height=52.5, align="left")
+                tile_padding = Box(rows[row], width=5, height=52.5, align="left")
+
+                # parse the results #
+                try:
+                    letter = results[row][0][box]
+                    color = results[row][1][box]
+                except IndexError: 
+                    letter = None
+                    color = IDLE
+
+                tiles.append(Tile(tile, color, letter))
+
+            try:
+                word = results[row][0]
+            except IndexError:
+                word = None
+            board.append(Row(tiles, word))
+            tiles = []
+
+        return app, board
+
 
 class Row:
     def __init__(self, tiles: list, word):
@@ -24,6 +154,16 @@ class Row:
 
         if (self.tiles[0].state == self.tiles[1].state == self.tiles[2].state == self.tiles[3].state == self.tiles[4].state == REVEALED):
             self.state = REVEALED
+
+    def get_word(self):
+        return self.word
+    
+    def set_word(self, word: str):
+        self.word = word
+        for letter in range(5):
+            self.tiles[letter].set_letter(word[letter])
+
+        return self.word
 
 class Tile:
     def __init__(self, tile: Box, color: str, letter: str):
@@ -158,4 +298,11 @@ class Tile:
             self.tile.repeat(10, self.__reveal)
         else:
             self.state = REVEALED
+
+    def get_letter(self):
+        return self.properties.get('letter', None)
+    
+    def set_letter(self, letter: str):
+        self.properties['letter'] = letter
+        return self.properties.get('letter')
 
